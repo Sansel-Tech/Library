@@ -1,0 +1,131 @@
+#-------------------------------------------#
+#        DEBUGGING RAW MEMORY IN GDB        #
+#-------------------------------------------#
+
+(gdb) shell cat data.c 
+
+
+int main()
+{
+	unsigned char *data0 = "helloworld";
+	char *data1 = "googlecloud";
+	unsigned char *data2 = "transistors";
+
+
+}
+
+#
+# Print local veriable to debug.
+#
+(gdb) i locals
+data0 = 0x400584 "helloworld"
+data1 = 0x40058f "googlecloud"
+data2 = 0x40059b "transistors"
+(gdb)
+
+#
+# Debug memory area with 'X' command
+#  
+(gdb) x/s data0
+0x400584:	"helloworld"
+(gdb) x/s data1
+0x40058f:	"googlecloud"
+(gdb) x/s data2
+0x40059b:	"transistors"
+(gdb)  
+
+#
+# Debug 5 segment of memory and print its contents as string.
+#
+(gdb) x/5s data0
+0x400584:	"helloworld"        <<<<<< String data in memory data0
+0x40058f:	"googlecloud"       <<<<<< String data in memory data1
+0x40059b:	"transistors"       <<<<<< String data in memory data2
+0x4005a7:	""                  <<<<<< Junk data. Because we have only 3 variable in soure-code.
+0x4005a8:	"\001\033\003;4"    <<<<<< Junk data. Because we have only 3 variable in soure-code.
+(gdb)  
+
+
+#
+# Examine data in single variable.
+# Here, examining data of the data0 variable.
+#
+# Print 26 byte of data in characters format started from data0 --- x/23c <variable>
+#
+# We can see at address 0x40058c the value of data1 (g in googlecloud) is started after the NULL byte ('\000') of data0
+#
+#
+(gdb)  
+(gdb) x/26c data0
+0x400584:	104 'h'	101 'e'	108 'l'	108 'l'	111 'o'	119 'w'	111 'o'	114 'r'
+0x40058c:	108 'l'	100 'd'	0 '\000'	103 'g'	111 'o'	111 'o'	103 'g'	108 'l'
+0x400594:	101 'e'	99 'c'	108 'l'	111 'o'	117 'u'	100 'd'	0 '\000'	116 't'
+0x40059c:	114 'r'	97 'a'
+(gdb)  
+
+#
+# Like above, Print 26 byte of data printf in HEX format started from data0 --- x/23c <variable>
+#
+(gdb)  
+(gdb) x/26x data0
+0x400584:	0x68	0x65	0x6c	0x6c	0x6f	0x77	0x6f	0x72
+0x40058c:	0x6c	0x64	0x00	0x67	0x6f	0x6f	0x67	0x6c
+0x400594:	0x65	0x63	0x6c	0x6f	0x75	0x64	0x00	0x74
+0x40059c:	0x72	0x61
+(gdb)  
+
+#
+# Print 26 byte of data started from data0 --- x/23c <variable>
+#
+(gdb) x/26b data0
+0x400584:	0x68	0x65	0x6c	0x6c	0x6f	0x77	0x6f	0x72
+0x40058c:	0x6c	0x64	0x00	0x67	0x6f	0x6f	0x67	0x6c
+0x400594:	0x65	0x63	0x6c	0x6f	0x75	0x64	0x00	0x74
+0x40059c:	0x72	0x61
+(gdb)  
+(gdb) 
+
+#
+# Print 8 word of memory space and pinting data in HEX values.
+#
+(gdb) x/8w data0
+0x400584:	0x6c6c6568	0x726f776f	0x6700646c	0x6c676f6f
+0x400594:	0x6f6c6365	0x74006475	0x736e6172	0x6f747369
+(gdb)  
+
+#
+# In one word of memory contain 4 bytes of data. 
+# contain data of (0x68 = 'h'	0x65 = 'e'	0x6c = 'l'	0x6c = 'l') in reverse manner.
+#
+(gdb) x/xw data0
+0x400584:	0x6c6c6568
+(gdb) 
+(gdb) x/4x data0
+0x400584:	0x68	0x65	0x6c	0x6c    <<<< HEX value in above ONE WORD of memory.
+(gdb) 
+(gdb) x/4c data0
+0x400584:	104 'h'	101 'e'	108 'l'	108 'l' <<<< CHAR value in above ONE WORD of memory.
+(gdb) 
+
+#
+# Print one HALF-WORD data (2 bytes).
+#
+(gdb) x/1xh data0                               
+0x400584:	0x6568            <<< (0x68 = 'h'	0x65 = 'e')
+(gdb)
+
+#
+# Print only one byte of variable.
+#
+(gdb) x/1xb data0
+0x400584:	0x68              <<< (0x68 = 'h')
+(gdb) 
+
+
+The unit size is any of 
+b -- Bytes.
+h -- Halfwords (two bytes).
+w -- Words (four bytes). This is the initial default.
+g -- Giant words (eight bytes).
+
+#END.
